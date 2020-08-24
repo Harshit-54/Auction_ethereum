@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.2.3/milligram.min.css">
+  
+    <script src="/home/harshit/node_modules/web3/dist/web3.min.js"></script>
+
+</head>
+<body class="container" style="padding-top: 3%;">
+
+        <h1>Blind Auction Platform</h1>
+        <h5 id="bidShow">Updates</h5>
+        <h2 id="test"></h2>
+
+       
+    <div class="row">
+      <div class="column">
+        <label>A/c-0</label>
+        <blockquote><p><em id="account0">100 ETH</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>A/c-1</label>
+        <blockquote><p><em id="account1">100 ETH</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>A/c-2</label>
+        <blockquote><p><em id="account2">100 ETH</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>A/c-3</label>
+        <blockquote><p><em id="account3">100 ETH</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>A/c-4</label>
+        <blockquote><p><em id="account4">100 ETH</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>A/c-5</label>
+        <blockquote><p><em id="account5">100 ETH</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>A/c-6</label>
+        <blockquote><p><em id="account6">100 ETH</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>A/c-7</label>
+        <blockquote><p><em id="account7">100 ETH</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>A/c-8</label>
+        <blockquote><p><em id="account8">100 ETH</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>A/c-9</label>
+        <blockquote><p><em id="account9">100 ETH</em><br /><br /></p></blockquote>
+      </div>
+    </div>
+
+	<div class="row">
+      <div class="column">
+        <label>Highest Bid</label>
+        <blockquote><p><em id="highestBid">Not revealed yet</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>Current Time</label>
+        <blockquote><p><em id="currentTime">Loading...</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>Reveal Time</label>
+        <blockquote><p><em id="revealTime">Loading...</em><br /><br /></p></blockquote>
+      </div>
+      <div class="column">
+        <label>Auction End Time</label>
+        <blockquote><p><em id="endTime">Loading...</em><br /><br /></p></blockquote>
+      </div>
+	</div>
+
+  <div class="row">
+      <button id="updateTime">Update Time</button>
+  </div>
+    <div class="row">
+        <div class="column">
+        	<label for="name" class="col-lg-2 control-label">Account number(1-9)</label>
+        	<input id="accountIndexBid" type="number">
+        </div>
+        <div class="column">
+			<label for="name" class="col-lg-2 control-label">Maximum bid allowance amount</label>
+        	<input id="bidAmount" type="number">
+        </div>
+        <div class="column">
+        	<label for="name" class="col-lg-2 control-label">Submit values</label>
+        	<button id="makeBid">Make Bid</button>
+    	</div>
+    </div>
+
+    <div class="row">
+    	<div class="column">
+        	<label for="name" class="col-lg-2 control-label">Account number(1-9)</label>
+        	<input id="accountIndexReveal" type="number">
+        </div>
+        <div class="column">
+        	<label for="name" class="col-lg-2 control-label">Actual Bid</label>
+        	<input id="value" type="number">
+        </div>
+        <div class="column">
+        	<label for="name" class="col-lg-2 control-label">Secret Value</label>
+       		<input id="bidAmount" type="number">
+       	</div>
+        <div class="column">
+        	<label for="name" class="col-lg-2 control-label">Reveal Bid here</label>
+        	<button id="reveal">Reveal</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="column">
+        	<label for="name" class="col-lg-2 control-label">Account Number(1-9)</label>
+       		<input id="accountIndexWithdraw" type="number" size="2">
+       	</div>
+        <div class="column">
+        	<label for="name" class="col-lg-2 control-label">Withdraw remaining amount here</label>
+        	<button id="withdraw">Withdraw</button>
+        </div>
+    </div>
+
+   
+    <button id="endAuction">End Auction</button>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+    <script>
+        if(typeof web3 !=='undefined'){
+            web3 = new Web3(web3.currentProvider);
+       	}else {
+            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+       	}
+       	web3.eth.Contract.defaultAccount = web3.eth.getAccounts()[0];
+    	web3.eth.getAccounts().then(function(accounts) {
+        	
+        	accounts.forEach(function(address){
+          	$('#bidAccount').innerHTML += '<option value="' + address + '">'+ address + '</option>';
+        	});
+
+        	var contractAbi = [ { "constant": true, "inputs": [], "name": "ended", "outputs": [ { "name":
+"", "type": "bool" } ], "payable": false, "stateMutability": "view", "type":
+"function" }, { "constant": true, "inputs": [], "name": "gettime", "outputs":
+[ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability":
+"view", "type": "function" }, { "constant": false, "inputs": [], "name":
+"bid", "outputs": [], "payable": true, "stateMutability": "payable", "type":
+"function" }, { "constant": false, "inputs": [ { "name": "_value", "type":
+"uint256" }, { "name": "_fake", "type": "bool" } ], "name": "reveal",
+"outputs": [], "payable": true, "stateMutability": "payable", "type":
+"function" }, { "constant": true, "inputs": [ { "name": "", "type": "address"
+} ], "name": "pendingReturns", "outputs": [ { "name": "", "type": "uint256" }
+], "payable": false, "stateMutability": "view", "type": "function" }, {
+"constant": false, "inputs": [], "name": "auctionEnd", "outputs": [],
+"payable": true, "stateMutability": "payable", "type": "function" }, {
+"constant": true, "inputs": [], "name": "beneficiary", "outputs": [ { "name":
+"", "type": "address" } ], "payable": false, "stateMutability": "view",
+"type": "function" }, { "constant": false, "inputs": [], "name": "withdraw",
+"outputs": [], "payable": true, "stateMutability": "payable", "type":
+"function" }, { "constant": true, "inputs": [], "name": "biddingEnd",
+"outputs": [ { "name": "", "type": "uint256" } ], "payable": false,
+"stateMutability": "view", "type": "function" }, { "constant": true, "inputs":
+[ { "name": "", "type": "address" } ], "name": "bids", "outputs": [ { "name":
+"blindedBid", "type": "string" }, { "name": "deposited", "type": "uint256" }
+], "payable": false, "stateMutability": "view", "type": "function" }, {
+"constant": true, "inputs": [], "name": "highestBidder", "outputs": [ {
+"name": "", "type": "address" } ], "payable": false, "stateMutability":
+"view", "type": "function" }, { "constant": true, "inputs": [], "name":
+"revealEnd", "outputs": [ { "name": "", "type": "uint256" } ], "payable":
+false, "stateMutability": "view", "type": "function" }, { "constant": true,
+"inputs": [], "name": "highestBid", "outputs": [ { "name": "", "type":
+"uint256" } ], "payable": false, "stateMutability": "view", "type": "function"
+}, { "inputs": [ { "name": "_biddingTime", "type": "uint256" }, { "name":
+"_revealTime", "type": "uint256" }, { "name": "_beneficiary", "type":
+"address" } ], "payable": false, "stateMutability": "nonpayable", "type":
+"constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name":
+"winner", "type": "address" }, { "indexed": false, "name": "highestBid",
+"type": "uint256" } ], "name": "AuctionEnded", "type": "event" } ];
+        	var contractBytecode='608060405234801561001057600080fd5b50604051606080610c18833981018060405281019080805190602001909291908051906020019092919080519060200190929190505050806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508242016001819055508160015401600281905550505050610b6b806100ad6000396000f3006080604052600436106100c5576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806312fa6feb146100ca57806316d061a5146100f95780631998aeef1461012457806320ed26e61461012e57806326b387bb1461015a5780632a24f46c146101b157806338af3eed146101bb5780633ccfd60b14610212578063423b217f1461021c57806362ea82db1461024757806391f901571461030a578063a6e6647714610361578063d57bde791461038c575b600080fd5b3480156100d657600080fd5b506100df6103b7565b604051808215151515815260200191505060405180910390f35b34801561010557600080fd5b5061010e6103ca565b6040518082815260200191505060405180910390f35b61012c6103d2565b005b61015860048036038101908080359060200190929190803515159060200190929190505050610487565b005b34801561016657600080fd5b5061019b600480360381019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610593565b6040518082815260200191505060405180910390f35b6101b96105ab565b005b3480156101c757600080fd5b506101d06106dd565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b61021a610702565b005b34801561022857600080fd5b506102316107df565b6040518082815260200191505060405180910390f35b34801561025357600080fd5b50610288600480360381019080803573ffffffffffffffffffffffffffffffffffffffff1690602001909291905050506107e5565b6040518080602001838152602001828103825284818151815260200191508051906020019080838360005b838110156102ce5780820151818401526020810190506102b3565b50505050905090810190601f1680156102fb5780820380516001836020036101000a031916815260200191505b50935050505060405180910390f35b34801561031657600080fd5b5061031f6108a1565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561036d57600080fd5b506103766108c7565b6040518082815260200191505060405180910390f35b34801561039857600080fd5b506103a16108cd565b6040518082815260200191505060405180910390f35b600360009054906101000a900460ff1681565b600042905090565b60408051908101604052806040805190810160405280600f81526020017f74656d706f72617279737472696e670000000000000000000000000000000000815250815260200134815250600460003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000206000820151816000019080519060200190610477929190610a1a565b5060208201518160010155905050565b600080600460003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020905080600101549150821580156104ee5750670de0b6b3a76400008402816001015410155b15610513576104fd33856108d3565b1561051257670de0b6b3a76400008402820391505b5b602060405190810160405280600081525081600001908051906020019061053b929190610a9a565b50600081600101819055503373ffffffffffffffffffffffffffffffffffffffff166108fc839081150290604051600060405180830381858888f1935050505015801561058c573d6000803e3d6000fd5b5050505050565b60076020528060005260406000206000915090505481565b600360009054906101000a900460ff161515156105c757600080fd5b7fdaec4582d5d9595688c8c98545fdd1c696d41c6aeaeb636737e84ed2f5c00eda600560009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16600654604051808373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019250505060405180910390a16001600360006101000a81548160ff0219169083151502179055506000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc6006549081150290604051600060405180830381858888f193505050501580156106da573d6000803e3d6000fd5b50565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6000600760003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905060008111156107dc576000600760003373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055503373ffffffffffffffffffffffffffffffffffffffff166108fc829081150290604051600060405180830381858888f193505050501580156107da573d6000803e3d6000fd5b505b50565b60015481565b6004602052806000526040600020600091509050806000018054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156108915780601f1061086657610100808354040283529160200191610891565b820191906000526020600020905b81548152906001019060200180831161087457829003601f168201915b5050505050908060010154905082565b600560009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60025481565b60065481565b6000600654670de0b6b3a764000083021115156108f35760009050610a14565b600073ffffffffffffffffffffffffffffffffffffffff16600560009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff161415156109bd5760065460076000600560009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600082825401925050819055505b670de0b6b3a7640000820260068190555082600560006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550600190505b92915050565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f10610a5b57805160ff1916838001178555610a89565b82800160010185558215610a89579182015b82811115610a88578251825591602001919060010190610a6d565b5b509050610a969190610b1a565b5090565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f10610adb57805160ff1916838001178555610b09565b82800160010185558215610b09579182015b82811115610b08578251825591602001919060010190610aed565b5b509050610b169190610b1a565b5090565b610b3c91905b80821115610b38576000816000905550600101610b20565b5090565b905600a165627a7a72305820885332108c13373dc86d940f2813b8003531a25c4352f063ffab400431fa926e0029';
+          
+	        var CoursetroContract =new web3.eth.Contract(contractAbi);
+          window.alert(CoursetroContract+"hey");
+          CoursetroContract.deploy({data: contractBytecode,arguments:['200','200',accounts[0]] }).send({
+			    from: accounts[0],
+			    gas: 1500000,
+			    gasPrice: '30000'
+			}, function(error, transactionHash){ if(!error){$("#bidShow").html("Contract Deployed");} else $("#bidShow").html("error here...");}
+      ).then((newContractInstance)=>{CoursetroContract.options.address=newContractInstance.options.address;
+      $("#bidShow").html("Contract address: "+CoursetroContract.options.address);},function(error1,result1){
+          if(!error1){
+            window.alert("working good");
+          }else window.alert("somethings wrong");
+        }
+      );
+			    console.log(CoursetroContract);
+	           $("#updateTime").click(function(){
+            CoursetroContract.methods.biddingEnd().call({from:accounts[0]},function(error,result){
+              if(!error){
+                  $("#revealTime").html(result);
+              }else 
+                  console.log(error);
+            });
+              CoursetroContract.methods.revealEnd().call({from:accounts[0]},function(error,result){
+                if(!error){
+                    $("#endTime").html(result);
+                }else 
+                    console.log(error);
+            });
+              CoursetroContract.methods.gettime().call({from:accounts[0]},function(error,result){
+                if(!error){
+                    $("#currentTime").html(result);
+                }else 
+                    console.log(error);
+            });
+          })
+	       
+	       	web3.eth.getBalance(accounts[0]).then((value)=>{$("#account0").html(value/1000000000000000000);});
+          web3.eth.getBalance(accounts[1]).then((value)=>{$("#account1").html(value/1000000000000000000);});
+          web3.eth.getBalance(accounts[2]).then((value)=>{$("#account2").html(value/1000000000000000000);});
+          web3.eth.getBalance(accounts[3]).then((value)=>{$("#account3").html(value/1000000000000000000);});
+          web3.eth.getBalance(accounts[4]).then((value)=>{$("#account4").html(value/1000000000000000000);});
+          web3.eth.getBalance(accounts[5]).then((value)=>{$("#account5").html(value/1000000000000000000);});
+          web3.eth.getBalance(accounts[6]).then((value)=>{$("#account6").html(value/1000000000000000000);});
+          web3.eth.getBalance(accounts[7]).then((value)=>{$("#account7").html(value/1000000000000000000);});
+          web3.eth.getBalance(accounts[8]).then((value)=>{$("#account8").html(value/1000000000000000000);});
+          web3.eth.getBalance(accounts[9]).then((value)=>{$("#account9").html(value/1000000000000000000);});
+
+       		
+        	
+	        $("#reveal").click(function(){
+	            CoursetroContract.methods.reveal($("#value").val(),false).send({from:accounts[$("#accountIndexReveal").val()]},function(error,result){
+	            if(!error){
+	            	window.alert("Revealing bid");
+	                $("#bidShow").html("Revealed bid: "+" account "+$("#accountIndexReveal").val()+" reveals "+ $("#value").val()+ " ETH");
+	                web3.eth.getBalance(accounts[$("#accountIndexReveal").val()]).then((value)=>{$("#account"+$("#accountIndexReveal").val()).html(value/1000000000000000000);});
+	            }else 
+
+	                console.log(error);
+
+	        	});
+	        });
+
+	        $("#withdraw").click(function(){
+	            CoursetroContract.methods.withdraw().send({from:accounts[$("#accountIndexWithdraw").val()]},function(error,result){
+	            if(!error){
+	                $("#bidShow").html("Withdrawing funds to account "+accounts[$("#accountIndexWithdraw").val()]);
+	                web3.eth.getBalance(accounts[$("#accountIndexWithdraw").val()]).then((value)=>{$("#account"+$("#accountIndexWithdraw").val()).html(value/1000000000000000000);});
+	            }else 
+
+	                console.log(error);
+
+	        	});
+	        });
+	         $("#endAuction").click(function(){
+	            CoursetroContract.methods.auctionEnd().send({from:accounts[0]},function(error,result){
+	            if(!error){
+	                $("#bidShow").html("Auction Ended. Transferring funds to beneficiary...");
+                  web3.eth.getBalance(accounts[0]).then((value)=>{$("#account0").html(value/1000000000000000000);});
+	            }else 
+
+	                console.log(error);
+
+	        	});
+	        });
+
+
+	        $("#makeBid").click(function(){
+	            CoursetroContract.methods.bid().send({from:accounts[$("#accountIndexBid").val()],value:$("#bidAmount").val()*1000000000000000000},function(error,result){
+	            if(!error){
+                  $("#bidShow").html("Account "+$("#accountIndexBid").val()+"'s maximum bidding amount: "+ $("#bidAmount").val()+ " ETH");
+	                web3.eth.getBalance(accounts[$("#accountIndexBid").val()]).then((value)=>{$("#account"+$("#accountIndexBid").val()).html(value/1000000000000000000);});
+	            }else 
+	                console.log(error);
+
+	        	});
+	        });
+		});
+    </script>
+
+</body>
+<pre><code>
+  pragma solidity ^0.4.0;
+contract BlindAuction {
+    struct Bid {
+        string blindedBid;
+        uint deposited;
+    }
+  
+    address public beneficiary;
+    uint public biddingEnd;
+    uint public revealEnd;
+    bool public ended;
+
+    mapping(address => Bid) public bids;
+
+    address public highestBidder;
+    uint public highestBid;
+
+    // Allowed withdrawals of previous bids
+    mapping(address => uint) public pendingReturns;
+
+    event AuctionEnded(address winner, uint highestBid);
+
+    /// Modifiers are a convenient way to validate inputs to
+    /// functions. `onlyBefore` is applied to `bid` below:
+    /// The new function body is the modifier's body where
+    /// `_` is replaced by the old function body.
+    modifier onlyBefore(uint _time) { require(now < _time); _; }
+    modifier onlyAfter(uint _time) { require(now > _time); _; }
+
+    constructor(
+        uint _biddingTime,
+        uint _revealTime,
+        address _beneficiary
+    ) public {
+        beneficiary = _beneficiary;
+        biddingEnd = now + _biddingTime;
+        revealEnd = biddingEnd + _revealTime;
+    }
+    
+    function gettime () public view returns(uint){
+        return block.timestamp;
+    }
+    function bid()
+        public
+        payable
+        // onlyBefore(biddingEnd)
+    {
+        bids[msg.sender]=Bid({
+            blindedBid: "temporarystring",
+            deposited: msg.value
+        });
+    }
+    
+  
+
+    /// Reveal your blinded bids. You will get a refund for all
+    /// correctly blinded invalid bids and for all bids except for
+    /// the totally highest.
+    function reveal(
+        uint _value,
+        bool _fake
+    )
+        public
+        payable
+        // onlyAfter(biddingEnd)
+        // onlyBefore(revealEnd)
+    {
+       
+        uint refund;
+        Bid storage bidToCheck = bids[msg.sender];
+        refund = bidToCheck.deposited;
+      
+        if(!_fake && bidToCheck.deposited >= _value*1000000000000000000){
+            if(placeBid(msg.sender,_value)){
+                refund-=_value*1000000000000000000;
+            }
+        }
+        // Make it impossible for the sender to re-claim
+        // the same deposit.
+        bidToCheck.blindedBid = "";
+        bidToCheck.deposited= 0;
+    
+        msg.sender.transfer(refund);
+    }
+
+    /// Withdraw a bid that was overbid.
+    function withdraw() public payable{
+        uint amount = pendingReturns[msg.sender];
+        if (amount > 0) {
+            // It is important to set this to zero because the recipient
+            // can call this function again as part of the receiving call
+            // before `transfer` returns (see the remark above about
+            // conditions -> effects -> interaction).
+            pendingReturns[msg.sender] = 0;
+            msg.sender.transfer(amount);
+        }
+    }
+
+    /// End the auction and send the highest bid
+    /// to the beneficiary.
+    function auctionEnd()
+        public
+        payable
+        // onlyAfter(revealEnd)
+    {
+        require(!ended);
+        emit AuctionEnded(highestBidder, highestBid);
+        ended = true;
+        beneficiary.transfer(highestBid);
+    }
+
+    function placeBid(address bidder, uint value) internal
+            returns (bool success)
+    {
+        if (value*1000000000000000000 <= highestBid) {
+            return false;
+        }
+        if (highestBidder != address(0)) {
+            // Refund the previously highest bidder.
+            pendingReturns[highestBidder] += highestBid;
+        }
+        highestBid = value*1000000000000000000;
+        highestBidder = bidder;
+        return true;
+    }
+}
+</code>
+</pre>>
+
+</html>
